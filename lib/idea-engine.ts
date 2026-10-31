@@ -9,7 +9,20 @@ const PALETTES: { keywords: string[]; palette: string[] }[] = [
   { keywords: ["minimal", "modern", "monochrome"], palette: ["#111111", "#555555", "#CCCCCC", "#FFFFFF"] },
 ];
 
-const DEFAULT_PALETTE = ["#6D5BFF", "#FFB84C", "#2EC4B6", "#F7F7F2"];
+/**
+ * Used when the vibe text doesn't match a specific keyword palette below.
+ * Varies by event type so two events without a matching vibe still look
+ * different, instead of every unmatched event falling back to one palette.
+ */
+const DEFAULT_PALETTES: Record<EventType, string[]> = {
+  wedding: ["#F7D9DA", "#D4AF37", "#FFFFFF", "#F4E9E1"],
+  birthday: ["#FF6B6B", "#FFD166", "#06D6A0", "#FFFFFF"],
+  anniversary: ["#7A0C2E", "#D4AF37", "#F8EEDD", "#4A1E1E"],
+  babyShower: ["#CDE6D0", "#F7D9DA", "#BFD7EA", "#FFFFFF"],
+  graduation: ["#1B1B3A", "#FFD166", "#4361EE", "#FFFFFF"],
+  corporate: ["#1F2937", "#2563EB", "#F3F4F6", "#FFFFFF"],
+  community: ["#00A8A8", "#FF6B6B", "#FFD166", "#FFFFFF"],
+};
 
 const THEME_IDEAS: Record<EventType, string[]> = {
   wedding: [
@@ -64,7 +77,7 @@ export function buildIdeas(input: EventInput): IdeaSet {
   const match = PALETTES.find((p) => p.keywords.some((k) => vibe.includes(k)));
 
   return {
-    palette: match?.palette ?? DEFAULT_PALETTE,
+    palette: match?.palette ?? DEFAULT_PALETTES[input.eventType],
     themeIdeas: THEME_IDEAS[input.eventType],
     activityIdeas: ACTIVITY_IDEAS[input.eventType],
   };

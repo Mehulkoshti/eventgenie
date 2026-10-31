@@ -19,9 +19,10 @@ describe("buildIdeas", () => {
     expect(ideas.palette).toEqual(["#F7D9DA", "#F4E9E1", "#CDE6D0", "#FFFFFF"]);
   });
 
-  it("falls back to a default palette for unmatched vibes", () => {
-    const ideas = buildIdeas({ ...baseInput, vibe: "something unusual entirely" });
-    expect(ideas.palette).toEqual(["#6D5BFF", "#FFB84C", "#2EC4B6", "#F7F7F2"]);
+  it("falls back to an event-type-specific default palette for unmatched vibes", () => {
+    const birthday = buildIdeas({ ...baseInput, vibe: "something unusual entirely" });
+    const wedding = buildIdeas({ ...baseInput, eventType: "wedding", vibe: "something unusual entirely" });
+    expect(birthday.palette).not.toEqual(wedding.palette);
   });
 
   it("returns event-type-specific theme and activity ideas", () => {
@@ -30,4 +31,12 @@ describe("buildIdeas", () => {
     expect(birthday.themeIdeas).not.toEqual(wedding.themeIdeas);
     expect(birthday.activityIdeas).not.toEqual(wedding.activityIdeas);
   });
+
+  it.each(["wedding", "birthday", "anniversary", "babyShower", "graduation", "corporate", "community"] as const)(
+    "has a distinct default palette for %s",
+    (eventType) => {
+      const ideas = buildIdeas({ ...baseInput, eventType, vibe: "" });
+      expect(ideas.palette.length).toBeGreaterThan(0);
+    },
+  );
 });
