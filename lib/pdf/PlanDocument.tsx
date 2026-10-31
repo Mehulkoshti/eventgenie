@@ -22,8 +22,12 @@ const formatDate = (iso: string) =>
   new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 
 const styles = StyleSheet.create({
-  page: { fontSize: 9.5, color: SLATE_900, fontFamily: "Helvetica" },
-  content: { paddingHorizontal: 32, paddingBottom: 48 },
+  // paddingBottom lives on the Page itself (not a nested View) because react-pdf's automatic
+  // pagination only reserves padding declared on Page for every auto-generated page break —
+  // a View's own padding only applies once, at the true end of its content, so the fixed
+  // footer would otherwise overlap the last row of content on every page but the final one.
+  page: { fontSize: 9.5, color: SLATE_900, fontFamily: "Helvetica", paddingBottom: 56 },
+  content: { paddingHorizontal: 32 },
 
   header: { backgroundColor: INDIGO, paddingHorizontal: 32, paddingVertical: 22, marginBottom: 20 },
   brandRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 14 },
