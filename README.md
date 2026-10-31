@@ -30,12 +30,12 @@ each with their own budget shape, lead times, and vendor checklist:
 
 ## What it does
 
-The whole experience lives on **one page** — a hero, feature highlights, a "how it works"
-explainer, then the planner itself; submitting the form reveals the full plan right below it, no
-page navigation required.
+`/` is a marketing landing page (hero, feature highlights, "how it works"); `/plan` is the
+planner itself — a 3-step form with a live preview card that updates as you type, and the full
+generated plan appears right on the same page once you submit.
 
 1. **A 3-step form** collects event type, name, date, guest count, budget, location, vibe, and
-   focus areas.
+   focus areas, with a live preview panel reflecting your choices as you go.
 2. **A deterministic planning engine** (pure TypeScript, fully unit-tested) immediately computes:
    - A **budget breakdown** with category percentages tuned per event type, a per-guest spend
      figure, and an automatic **tight-budget warning** when the per-guest spend is unrealistically
@@ -105,10 +105,11 @@ server-side only.
 ```
 eventgenie/
 ├── app/
-│   ├── page.tsx              # Thin wrapper around HomeExperience
+│   ├── page.tsx              # Landing page (thin wrapper around HomeExperience)
+│   ├── plan/page.tsx          # Wizard + live preview + results (client component)
 │   └── api/plan/route.ts     # POST /api/plan — validates input, builds plan, calls AI
 ├── components/
-│   ├── HomeExperience.tsx     # Single-page flow: hero → features → how-it-works → planner
+│   ├── HomeExperience.tsx     # Marketing landing: hero → features → how-it-works → CTA
 │   ├── wizard/                 # Multi-step form
 │   ├── dashboard/               # Budget/timeline/vendor/idea views + PDF download
 │   └── ui/                     # Shared Button, Card, Badge, Alert

@@ -1,12 +1,6 @@
-"use client";
-
-import { useRef, useState } from "react";
-import { Sparkles, Wallet, CalendarClock, Store, Palette, Loader2 } from "lucide-react";
-import type { EventInput, PlanResult } from "@/lib/types";
-import { EventForm } from "@/components/wizard/EventForm";
-import { PlanDashboard } from "@/components/dashboard/PlanDashboard";
+import Link from "next/link";
+import { Sparkles, Wallet, CalendarClock, Store, Palette } from "lucide-react";
 import { Card } from "@/components/ui/Card";
-import { Alert } from "@/components/ui/Alert";
 
 const FEATURES = [
   {
@@ -38,46 +32,6 @@ const STEPS = [
 ];
 
 export function HomeExperience() {
-  const [plan, setPlan] = useState<PlanResult | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const plannerRef = useRef<HTMLDivElement>(null);
-
-  const scrollToPlanner = () => {
-    plannerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
-
-  const handleSubmit = async (input: EventInput) => {
-    setIsSubmitting(true);
-    setError(null);
-
-    try {
-      const response = await fetch("/api/plan", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(input),
-      });
-
-      if (!response.ok) {
-        const body = await response.json().catch(() => ({}));
-        throw new Error(body.error || "Something went wrong generating your plan.");
-      }
-
-      const result: PlanResult = await response.json();
-      setPlan(result);
-      requestAnimationFrame(scrollToPlanner);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong generating your plan.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleStartOver = () => {
-    setPlan(null);
-    requestAnimationFrame(scrollToPlanner);
-  };
-
   return (
     <>
       <header id="top" className="sticky top-0 z-40 border-b border-slate-200/70 bg-white/80 backdrop-blur-md dark:border-slate-800/70 dark:bg-slate-950/80">
@@ -88,12 +42,12 @@ export function HomeExperience() {
             </span>
             EventGenie
           </a>
-          <button
-            onClick={scrollToPlanner}
+          <Link
+            href="/plan"
             className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700"
           >
             Start planning
-          </button>
+          </Link>
         </div>
       </header>
 
@@ -121,13 +75,13 @@ export function HomeExperience() {
               planning logic, personalized by AI.
             </p>
             <div className="mt-9">
-              <button
-                onClick={scrollToPlanner}
+              <Link
+                href="/plan"
                 className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-7 py-3.5 text-base font-semibold text-white shadow-lg shadow-indigo-500/25 transition-transform hover:scale-[1.02]"
               >
                 <Sparkles className="h-5 w-5" aria-hidden="true" />
                 Start planning — it&apos;s free
-              </button>
+              </Link>
             </div>
           </div>
         </section>
@@ -165,37 +119,22 @@ export function HomeExperience() {
           </div>
         </section>
 
-        {/* Planner */}
-        <section ref={plannerRef} id="planner" className="mx-auto max-w-5xl px-6 py-20">
-          {error && (
-            <div className="mb-6">
-              <Alert variant="danger" role="alert">
-                {error}
-              </Alert>
-            </div>
-          )}
-
-          {plan ? (
-            <PlanDashboard plan={plan} onStartOver={handleStartOver} />
-          ) : isSubmitting ? (
-            <Card className="flex flex-col items-center gap-3 py-16 text-center">
-              <Loader2 className="h-8 w-8 animate-spin text-indigo-600" aria-hidden="true" />
-              <p className="font-medium">Generating your plan…</p>
-              <p className="text-sm text-slate-500">Computing budget, timeline and vendors, then asking AI to personalize it.</p>
-            </Card>
-          ) : (
-            <div className="relative mx-auto max-w-xl">
-              <div
-                className="pointer-events-none absolute -inset-x-10 -top-10 -z-10 h-72 rounded-full bg-gradient-to-br from-indigo-300/30 via-violet-300/20 to-fuchsia-300/20 blur-3xl dark:from-indigo-900/30 dark:via-violet-900/20 dark:to-fuchsia-900/10"
-                aria-hidden="true"
-              />
-              <h2 className="mb-1 text-center text-2xl font-bold">Tell us about your event</h2>
-              <p className="mb-6 text-center text-sm text-slate-500">Three quick steps — your plan appears right here.</p>
-              <Card className="border-t-4 border-t-indigo-500 shadow-xl shadow-indigo-500/5">
-                <EventForm onSubmit={handleSubmit} isSubmitting={isSubmitting} />
-              </Card>
-            </div>
-          )}
+        {/* Final CTA */}
+        <section className="mx-auto max-w-3xl px-6 py-20 text-center">
+          <h2 className="text-2xl font-bold">Ready to plan your celebration?</h2>
+          <p className="mx-auto mt-2 max-w-xl text-slate-500">
+            It takes about a minute to fill in, and your full plan — budget, timeline, vendors and ideas — appears
+            right after.
+          </p>
+          <div className="mt-6">
+            <Link
+              href="/plan"
+              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-7 py-3.5 text-base font-semibold text-white shadow-lg shadow-indigo-500/25 transition-transform hover:scale-[1.02]"
+            >
+              <Sparkles className="h-5 w-5" aria-hidden="true" />
+              Start planning
+            </Link>
+          </div>
         </section>
       </main>
 

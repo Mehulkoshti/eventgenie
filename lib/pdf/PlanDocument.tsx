@@ -12,8 +12,11 @@ const AMBER = "#b45309";
 
 const PRIORITY_COLORS: Record<Priority, string> = { critical: ROSE, important: AMBER, optional: SLATE_500 };
 
-const formatInr = (n: number) =>
-  new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(n);
+// react-pdf's built-in Helvetica font has no glyph for ₹ (U+20B9) — it renders as a broken
+// character. The web UI can use ₹ freely (browser fonts cover it); the PDF uses "Rs." instead.
+const formatInr = (n: number) => `Rs. ${Math.round(n).toLocaleString("en-IN")}`;
+
+const sanitizeForPdf = (text: string) => text.replace(/₹/g, "Rs. ");
 
 const formatDate = (iso: string) =>
   new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
@@ -109,7 +112,7 @@ export function PlanDocument({ plan }: { plan: PlanResult }) {
       <Page size="A4" style={styles.page}>
         <View style={styles.header} fixed>
           <View style={styles.brandRow}>
-            <Text style={styles.brandMark}>✦ EventGenie</Text>
+            <Text style={styles.brandMark}>EventGenie</Text>
             <Text style={styles.brandTag}>AI Celebration & Event Planner</Text>
           </View>
           <Text style={styles.eventTitle}>{input.eventName}</Text>
@@ -123,7 +126,7 @@ export function PlanDocument({ plan }: { plan: PlanResult }) {
           {plan.aiNarrative && (
             <View style={styles.narrative}>
               <Text style={styles.narrativeLabel}>AI-PERSONALIZED SUMMARY</Text>
-              <Text>{plan.aiNarrative}</Text>
+              <Text>{sanitizeForPdf(plan.aiNarrative)}</Text>
             </View>
           )}
 
@@ -131,7 +134,12 @@ export function PlanDocument({ plan }: { plan: PlanResult }) {
             title="Budget breakdown"
             meta={`${formatInr(budget.total)} total · ~${formatInr(budget.perGuest)}/guest`}
           />
-          {budget.warning && <Text style={styles.warning}>⚠ {budget.warning}</Text>}
+          {budget.warning && (
+            <Text style={styles.warning}>
+              <Text style={{ fontFamily: "Helvetica-Bold" }}>Note: </Text>
+              {sanitizeForPdf(budget.warning)}
+            </Text>
+          )}
           {budget.lines.map((line, i) => (
             <View key={line.category} style={[styles.row, i % 2 === 1 ? styles.rowAlt : undefined]}>
               <View style={styles.rowLabel}>

@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
@@ -25,7 +25,7 @@ import { Alert } from "@/components/ui/Alert";
 import { InputField } from "@/components/ui/InputField";
 import { ProgressSteps } from "./ProgressSteps";
 
-const EVENT_TYPES: { value: EventType; label: string; emoji: string }[] = [
+export const EVENT_TYPES: { value: EventType; label: string; emoji: string }[] = [
   { value: "wedding", label: "Wedding", emoji: "💍" },
   { value: "birthday", label: "Birthday", emoji: "🎂" },
   { value: "anniversary", label: "Anniversary", emoji: "💞" },
@@ -51,7 +51,7 @@ const todayPlus = (days: number) => {
   return d.toISOString().slice(0, 10);
 };
 
-interface FormState {
+export interface FormState {
   eventType: EventType;
   eventName: string;
   eventDate: string;
@@ -73,10 +73,23 @@ const INITIAL_STATE: FormState = {
   focusAreas: [],
 };
 
-export function EventForm({ onSubmit, isSubmitting }: { onSubmit: (input: EventInput) => void; isSubmitting: boolean }) {
+export function EventForm({
+  onSubmit,
+  isSubmitting,
+  onChange,
+}: {
+  onSubmit: (input: EventInput) => void;
+  isSubmitting: boolean;
+  onChange?: (form: FormState) => void;
+}) {
   const [step, setStep] = useState(1);
   const [form, setForm] = useState<FormState>(INITIAL_STATE);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    onChange?.(form);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form]);
 
   const update = <K extends keyof FormState>(key: K, value: FormState[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
