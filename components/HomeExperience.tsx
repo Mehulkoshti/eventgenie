@@ -184,10 +184,14 @@ export function HomeExperience() {
               <p className="text-sm text-slate-500">Computing budget, timeline and vendors, then asking AI to personalize it.</p>
             </Card>
           ) : (
-            <div className="mx-auto max-w-xl">
+            <div className="relative mx-auto max-w-xl">
+              <div
+                className="pointer-events-none absolute -inset-x-10 -top-10 -z-10 h-72 rounded-full bg-gradient-to-br from-indigo-300/30 via-violet-300/20 to-fuchsia-300/20 blur-3xl dark:from-indigo-900/30 dark:via-violet-900/20 dark:to-fuchsia-900/10"
+                aria-hidden="true"
+              />
               <h2 className="mb-1 text-center text-2xl font-bold">Tell us about your event</h2>
               <p className="mb-6 text-center text-sm text-slate-500">Three quick steps — your plan appears right here.</p>
-              <Card>
+              <Card className="border-t-4 border-t-indigo-500 shadow-xl shadow-indigo-500/5">
                 <EventForm onSubmit={handleSubmit} isSubmitting={isSubmitting} />
               </Card>
             </div>

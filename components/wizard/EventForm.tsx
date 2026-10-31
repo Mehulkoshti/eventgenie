@@ -1,10 +1,28 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Sparkles,
+  Tag,
+  CalendarDays,
+  Users,
+  Wallet,
+  MapPin,
+  Palette,
+  MapPinned,
+  UtensilsCrossed,
+  Camera,
+  Music,
+  Mail,
+  Shirt,
+} from "lucide-react";
 import { eventInputSchema } from "@/lib/schema";
 import type { EventInput, EventType } from "@/lib/types";
 import { Button } from "@/components/ui/Button";
 import { Alert } from "@/components/ui/Alert";
+import { InputField } from "@/components/ui/InputField";
 import { ProgressSteps } from "./ProgressSteps";
 
 const EVENT_TYPES: { value: EventType; label: string; emoji: string }[] = [
@@ -17,7 +35,15 @@ const EVENT_TYPES: { value: EventType; label: string; emoji: string }[] = [
   { value: "community", label: "Community event", emoji: "🎪" },
 ];
 
-const FOCUS_AREAS = ["Venue", "Catering", "Decor", "Photography", "Entertainment", "Invitations", "Attire"];
+const FOCUS_AREAS = [
+  { label: "Venue", Icon: MapPinned },
+  { label: "Catering", Icon: UtensilsCrossed },
+  { label: "Decor", Icon: Palette },
+  { label: "Photography", Icon: Camera },
+  { label: "Entertainment", Icon: Music },
+  { label: "Invitations", Icon: Mail },
+  { label: "Attire", Icon: Shirt },
+];
 
 const todayPlus = (days: number) => {
   const d = new Date();
@@ -133,8 +159,11 @@ export function EventForm({ onSubmit, isSubmitting }: { onSubmit: (input: EventI
       )}
 
       {step === 1 && (
-        <fieldset className="space-y-4">
-          <legend className="text-lg font-semibold">What are we celebrating?</legend>
+        <fieldset key="step-1" className="animate-step-in space-y-5">
+          <legend className="mb-3 flex items-center gap-1.5 text-base font-semibold">
+            <Sparkles className="h-4 w-4 text-indigo-500" aria-hidden="true" />
+            What are we celebrating?
+          </legend>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3" role="radiogroup" aria-label="Event type">
             {EVENT_TYPES.map((type) => (
               <button
@@ -143,105 +172,108 @@ export function EventForm({ onSubmit, isSubmitting }: { onSubmit: (input: EventI
                 role="radio"
                 aria-checked={form.eventType === type.value}
                 onClick={() => update("eventType", type.value)}
-                className={`rounded-xl border p-3.5 text-left transition-colors ${
+                className={`group relative overflow-hidden rounded-xl border p-4 text-left transition-all duration-150 hover:-translate-y-0.5 hover:shadow-md ${
                   form.eventType === type.value
-                    ? "border-indigo-600 bg-indigo-50 ring-1 ring-indigo-600 dark:bg-indigo-900/30"
-                    : "border-slate-200 hover:border-indigo-300 dark:border-slate-700"
+                    ? "border-transparent bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-lg shadow-indigo-500/25"
+                    : "border-slate-200 bg-white hover:border-indigo-300 dark:border-slate-700 dark:bg-slate-900"
                 }`}
               >
-                <span className="text-2xl" aria-hidden="true">{type.emoji}</span>
-                <p className="mt-1 text-sm font-medium">{type.label}</p>
+                <span
+                  className="block text-2xl transition-transform group-hover:scale-110"
+                  aria-hidden="true"
+                >
+                  {type.emoji}
+                </span>
+                <p className={`mt-1.5 text-sm font-semibold ${form.eventType === type.value ? "text-white" : ""}`}>
+                  {type.label}
+                </p>
               </button>
             ))}
           </div>
 
-          <label className="block">
-            <span className="mb-1 block text-sm font-medium">Event name</span>
-            <input
-              type="text"
-              value={form.eventName}
-              onChange={(e) => update("eventName", e.target.value)}
-              placeholder="e.g. Rhea & Dev's Wedding"
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 dark:border-slate-700 dark:bg-slate-900"
-              required
-            />
-          </label>
+          <InputField
+            label="Event name"
+            icon={<Tag className="h-4 w-4" aria-hidden="true" />}
+            type="text"
+            value={form.eventName}
+            onChange={(e) => update("eventName", e.target.value)}
+            placeholder="e.g. Rhea & Dev's Wedding"
+            required
+          />
 
-          <label className="block">
-            <span className="mb-1 block text-sm font-medium">Event date</span>
-            <input
-              type="date"
-              value={form.eventDate}
-              onChange={(e) => update("eventDate", e.target.value)}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 dark:border-slate-700 dark:bg-slate-900"
-              required
-            />
-          </label>
+          <InputField
+            label="Event date"
+            icon={<CalendarDays className="h-4 w-4" aria-hidden="true" />}
+            type="date"
+            value={form.eventDate}
+            onChange={(e) => update("eventDate", e.target.value)}
+            required
+          />
         </fieldset>
       )}
 
       {step === 2 && (
-        <fieldset className="space-y-4">
-          <legend className="text-lg font-semibold">Scale & budget</legend>
+        <fieldset key="step-2" className="animate-step-in space-y-5">
+          <legend className="mb-3 flex items-center gap-1.5 text-base font-semibold">
+            <Wallet className="h-4 w-4 text-indigo-500" aria-hidden="true" />
+            Scale & budget
+          </legend>
 
-          <label className="block">
-            <span className="mb-1 block text-sm font-medium">Expected guest count</span>
-            <input
-              type="number"
-              min={1}
-              value={form.guestCount}
-              onChange={(e) => update("guestCount", e.target.value)}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 dark:border-slate-700 dark:bg-slate-900"
-              required
-            />
-          </label>
+          <InputField
+            label="Expected guest count"
+            icon={<Users className="h-4 w-4" aria-hidden="true" />}
+            type="number"
+            min={1}
+            value={form.guestCount}
+            onChange={(e) => update("guestCount", e.target.value)}
+            required
+          />
 
-          <label className="block">
-            <span className="mb-1 block text-sm font-medium">Total budget (₹)</span>
-            <input
-              type="number"
-              min={1000}
-              step={1000}
-              value={form.budget}
-              onChange={(e) => update("budget", e.target.value)}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 dark:border-slate-700 dark:bg-slate-900"
-              required
-            />
-          </label>
+          <InputField
+            label="Total budget (₹)"
+            icon={<Wallet className="h-4 w-4" aria-hidden="true" />}
+            type="number"
+            min={1000}
+            step={1000}
+            value={form.budget}
+            onChange={(e) => update("budget", e.target.value)}
+            required
+          />
 
-          <label className="block">
-            <span className="mb-1 block text-sm font-medium">City/location</span>
-            <input
-              type="text"
-              value={form.location}
-              onChange={(e) => update("location", e.target.value)}
-              placeholder="e.g. Jaipur"
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 dark:border-slate-700 dark:bg-slate-900"
-              required
-            />
-          </label>
+          <InputField
+            label="City/location"
+            icon={<MapPin className="h-4 w-4" aria-hidden="true" />}
+            type="text"
+            value={form.location}
+            onChange={(e) => update("location", e.target.value)}
+            placeholder="e.g. Jaipur"
+            required
+          />
         </fieldset>
       )}
 
       {step === 3 && (
-        <fieldset className="space-y-4">
-          <legend className="text-lg font-semibold">Vibe & focus areas</legend>
+        <fieldset key="step-3" className="animate-step-in space-y-5">
+          <legend className="mb-3 flex items-center gap-1.5 text-base font-semibold">
+            <Palette className="h-4 w-4 text-indigo-500" aria-hidden="true" />
+            Vibe & focus areas
+          </legend>
 
-          <label className="block">
-            <span className="mb-1 block text-sm font-medium">Describe the vibe/theme</span>
-            <input
-              type="text"
-              value={form.vibe}
-              onChange={(e) => update("vibe", e.target.value)}
-              placeholder="e.g. pastel garden, boho, royal, minimal"
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 dark:border-slate-700 dark:bg-slate-900"
-            />
-          </label>
+          <InputField
+            label="Describe the vibe/theme"
+            icon={<Palette className="h-4 w-4" aria-hidden="true" />}
+            type="text"
+            value={form.vibe}
+            onChange={(e) => update("vibe", e.target.value)}
+            placeholder="e.g. pastel garden, boho, royal, minimal"
+          />
 
           <div>
-            <span className="mb-2 block text-sm font-medium">What matters most to you? (optional)</span>
+            <span className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
+              What matters most to you? (optional)
+            </span>
             <div className="flex flex-wrap gap-2" role="group" aria-label="Focus areas">
-              {FOCUS_AREAS.map((area) => {
+              {FOCUS_AREAS.map(({ label: area, Icon }) => {
                 const selected = form.focusAreas.includes(area);
                 return (
                   <button
@@ -249,12 +281,13 @@ export function EventForm({ onSubmit, isSubmitting }: { onSubmit: (input: EventI
                     key={area}
                     aria-pressed={selected}
                     onClick={() => toggleFocusArea(area)}
-                    className={`rounded-full border px-3 py-1.5 text-sm transition-colors ${
+                    className={`flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm transition-all ${
                       selected
-                        ? "border-indigo-600 bg-indigo-600 text-white"
+                        ? "border-transparent bg-gradient-to-r from-indigo-500 to-violet-600 text-white shadow-sm"
                         : "border-slate-300 text-slate-700 hover:border-indigo-300 dark:border-slate-700 dark:text-slate-300"
                     }`}
                   >
+                    <Icon className="h-3.5 w-3.5" aria-hidden="true" />
                     {area}
                   </button>
                 );
@@ -264,17 +297,20 @@ export function EventForm({ onSubmit, isSubmitting }: { onSubmit: (input: EventI
         </fieldset>
       )}
 
-      <div className="flex items-center justify-between pt-2">
+      <div className="flex items-center justify-between border-t border-slate-100 pt-5 dark:border-slate-800">
         <Button type="button" variant="ghost" onClick={goBack} disabled={step === 1}>
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
           Back
         </Button>
 
         {step < 3 ? (
           <Button type="button" onClick={goNext}>
             Next
+            <ArrowRight className="h-4 w-4" aria-hidden="true" />
           </Button>
         ) : (
           <Button type="submit" disabled={isSubmitting}>
+            <Sparkles className="h-4 w-4" aria-hidden="true" />
             {isSubmitting ? "Generating your plan…" : "Generate my plan"}
           </Button>
         )}

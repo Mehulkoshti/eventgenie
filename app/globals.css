@@ -39,3 +39,18 @@ body {
   outline: 2px solid #6d5bff;
   outline-offset: 2px;
 }
+
+@keyframes step-in {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-step-in {
+  animation: step-in 0.3s ease-out;
+}
