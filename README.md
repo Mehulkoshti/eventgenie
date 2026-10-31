@@ -9,7 +9,7 @@ A GenAI-powered planning assistant that turns a few basic facts about a wedding,
 community event into a complete, ready-to-use plan — budget, countdown timeline, vendor
 checklist, and personalized theme ideas — in seconds.
 
-**Live demo:** _add your deployed URL here before submission_
+**Live demo:** https://eventgenie-ai.netlify.app
 
 ---
 
@@ -193,7 +193,7 @@ npm run dev
 ## Tech stack
 
 Next.js 16 (App Router) · TypeScript (strict) · Tailwind CSS 4 · Zod · Vitest + Testing Library ·
-DeepSeek Chat API
+DeepSeek Chat API · deployed on Netlify (serverless function for `/api/plan`)
 
 ## License
 
