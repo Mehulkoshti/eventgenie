@@ -2,9 +2,7 @@
 
 import { useState } from "react";
 import { Download, Loader2 } from "lucide-react";
-import { pdf } from "@react-pdf/renderer";
 import type { PlanResult } from "@/lib/types";
-import { PlanDocument } from "@/lib/pdf/PlanDocument";
 import { Button } from "@/components/ui/Button";
 
 export function DownloadPdfButton({ plan }: { plan: PlanResult }) {
@@ -13,6 +11,12 @@ export function DownloadPdfButton({ plan }: { plan: PlanResult }) {
   const handleDownload = async () => {
     setIsGenerating(true);
     try {
+      // @react-pdf/renderer (~1.3MB) is only fetched here, on click — not bundled into the
+      // initial /plan page load, which most visitors never need since many just browse the plan.
+      const [{ pdf }, { PlanDocument }] = await Promise.all([
+        import("@react-pdf/renderer"),
+        import("@/lib/pdf/PlanDocument"),
+      ]);
       const blob = await pdf(<PlanDocument plan={plan} />).toBlob();
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");

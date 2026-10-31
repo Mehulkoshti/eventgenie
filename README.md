@@ -2,7 +2,7 @@
 
 ![Next.js](https://img.shields.io/badge/Next.js-16-black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue)
-![Tests](https://img.shields.io/badge/tests-48%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-64%20passing-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
 A GenAI-powered planning assistant that turns a few basic facts about a celebration into a
@@ -85,7 +85,7 @@ server-side only.
 | Smart, dynamic assistant | Form → deterministic engine → AI narrative pipeline, fully dynamic per event type |
 | Logical decision making based on user context | Budget % varies by event type; tight-budget warning from per-guest spend; urgent-mode timeline compression from days-until-event; book-immediately flags from vendor lead time vs. remaining time |
 | Practical, real-world usability | Real INR budgeting, realistic vendor lead times, a real downloadable PDF, persisted checklist progress, 7 event types |
-| Clean, maintainable code | Pure functions in `lib/`, typed end-to-end, Zod-validated API boundary, 48 unit tests |
+| Clean, maintainable code | Pure functions in `lib/`, typed end-to-end, Zod-validated API boundary, 64 unit tests |
 
 ## Assumptions
 
@@ -144,6 +144,21 @@ eventgenie/
   can't hang the request — the deterministic plan is still returned.
 - **No secrets in the repo.** `.env*` is gitignored; `.env.example` documents the required variable
   with no real value.
+- **Security headers.** `next.config.ts` sets `X-Content-Type-Options: nosniff`,
+  `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`, and a
+  `Permissions-Policy` that denies camera/microphone/geolocation, on every route.
+
+## Efficiency
+
+- **PDF generation is lazy-loaded.** `@react-pdf/renderer` (~1.3MB) is dynamically imported only
+  inside the Download PDF click handler (`DownloadPdfButton.tsx`) — it never ships in the initial
+  `/plan` bundle, which most visitors load before ever generating a plan.
+- **Static where possible.** `/` and `/plan` are prerendered as static HTML; only `/api/plan` is a
+  dynamic serverless function.
+- **No client-side AI calls.** The DeepSeek request happens once per plan generation, server-side,
+  with a 9s timeout — no retries-on-the-client, no polling.
+- **Deterministic math is synchronous and allocation-free of external calls** — budget/timeline/
+  vendor/idea computation never touches the network, so it's instant regardless of AI latency.
 
 ## Accessibility
 
@@ -159,8 +174,7 @@ eventgenie/
 
 ## Testing
 
-48 unit tests (Vitest) cover every pure module in `lib/`, including a parametrized pass over all
-7 event types for the budget and vendor engines:
+64 tests (Vitest + Testing Library) cover every pure module in `lib/` plus key component behavior:
 
 - `budget-engine`: allocation sums to exactly 100% of the budget for every event type, per-guest
   math, tight-budget warning threshold, distinct rules per event type, zero-guest guard.
@@ -168,10 +182,16 @@ eventgenie/
   ordering after compression.
 - `vendor-checklist`: book-immediately flag vs. remaining lead time, non-empty checklist for every
   event type.
-- `idea-engine`: palette keyword matching and fallback, event-type-specific ideas.
+- `idea-engine`: palette keyword matching and an event-type-specific (not shared) default palette
+  when nothing matches, event-type-specific theme/activity ideas.
 - `schema`: accepts all 7 event types, rejects bad enum/date/numbers, coerces form strings,
   applies defaults.
 - `ratelimit`: allows under the cap, blocks over it, resets after the window, isolates clients.
+- `Alert`: renders title/children, defaults to a non-interrupting `status` role, switches to
+  `alert` when passed explicitly.
+- `EventForm`: renders all 7 event types with the right default selection, blocks advancing past
+  step 1 without a name, advances once required fields are filled, reports live state via
+  `onChange`.
 
 ```bash
 npm run test        # run once
