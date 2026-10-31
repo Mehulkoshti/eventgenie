@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const eventInputSchema = z.object({
-  eventType: z.enum(["wedding", "birthday", "community"]),
+  eventType: z.enum(["wedding", "birthday", "anniversary", "babyShower", "graduation", "corporate", "community"]),
   eventName: z.string().trim().min(1).max(80),
   eventDate: z.string().refine((v) => !Number.isNaN(Date.parse(v)), "Invalid date"),
   guestCount: z.coerce.number().int().min(1).max(100000),

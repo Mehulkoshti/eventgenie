@@ -1,3 +1,4 @@
+import { EVENT_TYPE_LABELS } from "./types";
 import type { BudgetLine, BudgetPlan, EventInput, EventType } from "./types";
 
 interface AllocationRule {
@@ -27,6 +28,44 @@ const ALLOCATION_RULES: Record<EventType, AllocationRule[]> = {
     { category: "Attire & styling", percent: 3, note: "Outfits for the celebrant" },
     { category: "Contingency", percent: 5, note: "Buffer for last-minute changes" },
   ],
+  anniversary: [
+    { category: "Venue & rentals", percent: 20, note: "Hall, lawn, or restaurant private dining" },
+    { category: "Catering & cake", percent: 32, note: "Dinner/cocktail menu and celebration cake" },
+    { category: "Decor & florals", percent: 12, note: "Table styling, florals, photo-wall" },
+    { category: "Photography", percent: 10, note: "Candid coverage of the celebration" },
+    { category: "Entertainment & music", percent: 10, note: "Live music, playlist, speeches" },
+    { category: "Invitations & favors", percent: 6, note: "Invites and guest keepsakes" },
+    { category: "Attire & styling", percent: 5, note: "Outfits for the couple" },
+    { category: "Contingency", percent: 5, note: "Buffer for last-minute changes" },
+  ],
+  babyShower: [
+    { category: "Venue & rentals", percent: 18, note: "Home setup, banquet hall, or garden" },
+    { category: "Catering & cake", percent: 28, note: "Food, mocktails, themed cake" },
+    { category: "Decor & theming", percent: 20, note: "Balloons, backdrop, theme props" },
+    { category: "Games & favors", percent: 15, note: "Games, prizes, return gifts" },
+    { category: "Photography", percent: 10, note: "Candid + portrait coverage" },
+    { category: "Invitations", percent: 4, note: "Digital + printed invites" },
+    { category: "Contingency", percent: 5, note: "Buffer for last-minute changes" },
+  ],
+  graduation: [
+    { category: "Venue & rentals", percent: 20, note: "Hall, rooftop, or at-home setup" },
+    { category: "Catering & cake", percent: 28, note: "Food, beverages, celebration cake" },
+    { category: "Decor & theming", percent: 15, note: "Backdrop, balloons, memory wall" },
+    { category: "Entertainment & music", percent: 15, note: "DJ, playlist, games" },
+    { category: "Photography", percent: 12, note: "Candid + portrait coverage" },
+    { category: "Invitations & favors", percent: 5, note: "Invites and small keepsakes" },
+    { category: "Contingency", percent: 5, note: "Buffer for last-minute changes" },
+  ],
+  corporate: [
+    { category: "Venue & AV setup", percent: 25, note: "Hall hire, sound, projection, Wi-Fi" },
+    { category: "Catering & beverages", percent: 25, note: "Lunch/dinner or cocktail catering" },
+    { category: "Entertainment & program", percent: 15, note: "Speakers, performers, activities" },
+    { category: "Decor & branding", percent: 12, note: "Stage, banners, branded signage" },
+    { category: "Photography & video", percent: 8, note: "Event coverage and highlight reel" },
+    { category: "Invitations & collateral", percent: 5, note: "Invites, badges, printed collateral" },
+    { category: "Logistics", percent: 5, note: "Transport, registration desk, signage" },
+    { category: "Contingency", percent: 5, note: "Buffer for last-minute changes" },
+  ],
   community: [
     { category: "Venue & permits", percent: 15, note: "Ground/hall booking and local permits" },
     { category: "Catering & refreshments", percent: 25, note: "Scales with footfall estimate" },
@@ -42,6 +81,10 @@ const ALLOCATION_RULES: Record<EventType, AllocationRule[]> = {
 const MIN_PER_GUEST: Record<EventType, number> = {
   wedding: 1200,
   birthday: 600,
+  anniversary: 900,
+  babyShower: 500,
+  graduation: 600,
+  corporate: 800,
   community: 150,
 };
 
@@ -65,7 +108,7 @@ export function allocateBudget(input: EventInput): BudgetPlan {
     lines,
     tightBudget,
     warning: tightBudget
-      ? `At ~₹${Math.round(perGuest)} per guest, this budget is tight for a ${input.eventType}. Consider trimming decor/entertainment or reducing the guest list to protect catering and venue quality.`
+      ? `At ~₹${Math.round(perGuest)} per guest, this budget is tight for a ${EVENT_TYPE_LABELS[input.eventType]}. Consider trimming decor/entertainment or reducing the guest list to protect catering and venue quality.`
       : undefined,
   };
 }

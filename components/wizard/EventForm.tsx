@@ -4,11 +4,16 @@ import { FormEvent, useState } from "react";
 import { eventInputSchema } from "@/lib/schema";
 import type { EventInput, EventType } from "@/lib/types";
 import { Button } from "@/components/ui/Button";
+import { Alert } from "@/components/ui/Alert";
 import { ProgressSteps } from "./ProgressSteps";
 
 const EVENT_TYPES: { value: EventType; label: string; emoji: string }[] = [
   { value: "wedding", label: "Wedding", emoji: "💍" },
   { value: "birthday", label: "Birthday", emoji: "🎂" },
+  { value: "anniversary", label: "Anniversary", emoji: "💞" },
+  { value: "babyShower", label: "Baby shower", emoji: "👶" },
+  { value: "graduation", label: "Graduation", emoji: "🎓" },
+  { value: "corporate", label: "Corporate event", emoji: "🏢" },
   { value: "community", label: "Community event", emoji: "🎪" },
 ];
 
@@ -120,15 +125,17 @@ export function EventForm({ onSubmit, isSubmitting }: { onSubmit: (input: EventI
       <ProgressSteps currentStep={step} />
 
       {error && (
-        <p id="form-error" role="alert" className="rounded-lg bg-rose-50 px-4 py-2 text-sm text-rose-700 dark:bg-rose-900/30 dark:text-rose-300">
-          {error}
-        </p>
+        <div id="form-error">
+          <Alert variant="danger" role="alert">
+            {error}
+          </Alert>
+        </div>
       )}
 
       {step === 1 && (
         <fieldset className="space-y-4">
           <legend className="text-lg font-semibold">What are we celebrating?</legend>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3" role="radiogroup" aria-label="Event type">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3" role="radiogroup" aria-label="Event type">
             {EVENT_TYPES.map((type) => (
               <button
                 key={type.value}
@@ -136,14 +143,14 @@ export function EventForm({ onSubmit, isSubmitting }: { onSubmit: (input: EventI
                 role="radio"
                 aria-checked={form.eventType === type.value}
                 onClick={() => update("eventType", type.value)}
-                className={`rounded-xl border p-4 text-left transition-colors ${
+                className={`rounded-xl border p-3.5 text-left transition-colors ${
                   form.eventType === type.value
-                    ? "border-indigo-600 bg-indigo-50 dark:bg-indigo-900/30"
+                    ? "border-indigo-600 bg-indigo-50 ring-1 ring-indigo-600 dark:bg-indigo-900/30"
                     : "border-slate-200 hover:border-indigo-300 dark:border-slate-700"
                 }`}
               >
                 <span className="text-2xl" aria-hidden="true">{type.emoji}</span>
-                <p className="mt-1 font-medium">{type.label}</p>
+                <p className="mt-1 text-sm font-medium">{type.label}</p>
               </button>
             ))}
           </div>

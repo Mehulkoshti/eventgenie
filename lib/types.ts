@@ -1,4 +1,21 @@
-export type EventType = "wedding" | "birthday" | "community";
+export type EventType =
+  | "wedding"
+  | "birthday"
+  | "anniversary"
+  | "babyShower"
+  | "graduation"
+  | "corporate"
+  | "community";
+
+export const EVENT_TYPE_LABELS: Record<EventType, string> = {
+  wedding: "wedding",
+  birthday: "birthday",
+  anniversary: "anniversary",
+  babyShower: "baby shower",
+  graduation: "graduation party",
+  corporate: "corporate event",
+  community: "community event",
+};
 
 export type Priority = "critical" | "important" | "optional";
 

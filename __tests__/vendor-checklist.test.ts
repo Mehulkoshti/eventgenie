@@ -1,6 +1,16 @@
 import { describe, expect, it } from "vitest";
 import { buildVendorChecklist } from "@/lib/vendor-checklist";
-import type { EventInput } from "@/lib/types";
+import type { EventInput, EventType } from "@/lib/types";
+
+const ALL_EVENT_TYPES: EventType[] = [
+  "wedding",
+  "birthday",
+  "anniversary",
+  "babyShower",
+  "graduation",
+  "corporate",
+  "community",
+];
 
 const baseInput: EventInput = {
   eventType: "community",
@@ -30,5 +40,10 @@ describe("buildVendorChecklist", () => {
     const community = buildVendorChecklist(baseInput, 100);
     const wedding = buildVendorChecklist({ ...baseInput, eventType: "wedding" }, 100);
     expect(community.items.map((i) => i.category)).not.toEqual(wedding.items.map((i) => i.category));
+  });
+
+  it.each(ALL_EVENT_TYPES)("produces a non-empty vendor checklist for %s", (eventType) => {
+    const plan = buildVendorChecklist({ ...baseInput, eventType }, 100);
+    expect(plan.items.length).toBeGreaterThan(0);
   });
 });

@@ -2,12 +2,12 @@
 
 ![Next.js](https://img.shields.io/badge/Next.js-16-black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue)
-![Tests](https://img.shields.io/badge/tests-27%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-48%20passing-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
-A GenAI-powered planning assistant that turns a few basic facts about a wedding, birthday, or
-community event into a complete, ready-to-use plan — budget, countdown timeline, vendor
-checklist, and personalized theme ideas — in seconds.
+A GenAI-powered planning assistant that turns a few basic facts about a celebration into a
+complete, ready-to-use plan — budget, countdown timeline, vendor checklist, and personalized
+theme ideas — right on the landing page, in seconds.
 
 **Live demo:** https://eventgenie-ai.netlify.app
 
@@ -15,15 +15,24 @@ checklist, and personalized theme ideas — in seconds.
 
 ## Chosen vertical
 
-**[Challenge 5] Celebration & Event Planner** — building a smart assistant for three personas:
+**[Challenge 5] Celebration & Event Planner** — building a smart assistant for seven personas,
+each with their own budget shape, lead times, and vendor checklist:
 
 | Persona | Event type | Core need |
 |---|---|---|
 | A couple planning their wedding | `wedding` | High-stakes, high-budget, many vendors, long lead times |
 | A parent/host planning a birthday | `birthday` | Shorter runway, tighter budget, fun over formality |
+| A couple celebrating an anniversary | `anniversary` | Intimate, sentimental, moderate budget |
+| Friends/family planning a baby shower | `babyShower` | Games-and-favors-heavy, shorter runway |
+| A family planning a graduation party | `graduation` | Mixed-age guests, memory-focused theming |
+| A company planning a corporate event | `corporate` | AV/logistics-heavy, speaker/program coordination |
 | An organizer running a community event | `community` | Permits/logistics-heavy, variable turnout, public safety |
 
 ## What it does
+
+The whole experience lives on **one page** — a hero, feature highlights, a "how it works"
+explainer, then the planner itself; submitting the form reveals the full plan right below it, no
+page navigation required.
 
 1. **A 3-step form** collects event type, name, date, guest count, budget, location, vibe, and
    focus areas.
@@ -43,10 +52,14 @@ checklist, and personalized theme ideas — in seconds.
 3. **An AI narrative layer** sends those already-computed facts to an LLM, which writes a short,
    warm summary highlighting the top priorities and one personalized touch for the stated vibe.
    The AI never invents numbers — it only phrases facts the deterministic engine already computed.
-4. **Export/Print** turns the plan into a print-friendly page (save as PDF from the browser print
-   dialog) — no backend file generation needed.
+4. **Download PDF** generates a real, multi-page PDF of the plan entirely in the browser
+   (`@react-pdf/renderer`) — no backend file generation, and no dependence on the browser's own
+   print-to-PDF dialog (which renders inconsistently across browsers/OSes).
 5. Checklist progress is remembered per-browser via `localStorage`, so returning to the plan keeps
    your checked-off tasks.
+6. Warnings, errors and status messages use a consistent `Alert` component (icon + colored card),
+   not plain text — budget warnings, urgent-timeline notices, book-immediately flags, and form
+   validation all look and read the same way.
 
 ## How Generative AI is used
 
@@ -71,8 +84,8 @@ server-side only.
 |---|---|
 | Smart, dynamic assistant | Form → deterministic engine → AI narrative pipeline, fully dynamic per event type |
 | Logical decision making based on user context | Budget % varies by event type; tight-budget warning from per-guest spend; urgent-mode timeline compression from days-until-event; book-immediately flags from vendor lead time vs. remaining time |
-| Practical, real-world usability | Real INR budgeting, realistic vendor lead times, printable/exportable plan, persisted checklist progress |
-| Clean, maintainable code | Pure functions in `lib/`, typed end-to-end, Zod-validated API boundary, 27 unit tests |
+| Practical, real-world usability | Real INR budgeting, realistic vendor lead times, a real downloadable PDF, persisted checklist progress, 7 event types |
+| Clean, maintainable code | Pure functions in `lib/`, typed end-to-end, Zod-validated API boundary, 48 unit tests |
 
 ## Assumptions
 
@@ -92,23 +105,24 @@ server-side only.
 ```
 eventgenie/
 ├── app/
-│   ├── page.tsx              # Landing page
-│   ├── plan/page.tsx         # Wizard + results (client component)
+│   ├── page.tsx              # Thin wrapper around HomeExperience
 │   └── api/plan/route.ts     # POST /api/plan — validates input, builds plan, calls AI
+├── components/
+│   ├── HomeExperience.tsx     # Single-page flow: hero → features → how-it-works → planner
+│   ├── wizard/                 # Multi-step form
+│   ├── dashboard/               # Budget/timeline/vendor/idea views + PDF download
+│   └── ui/                     # Shared Button, Card, Badge, Alert
 ├── lib/
-│   ├── types.ts              # Shared domain types
+│   ├── types.ts              # Shared domain types + EVENT_TYPE_LABELS
 │   ├── schema.ts             # Zod request validation (shared client + server)
-│   ├── budget-engine.ts      # Pure: budget allocation + tight-budget warning
+│   ├── budget-engine.ts      # Pure: budget allocation + tight-budget warning (7 event types)
 │   ├── timeline-engine.ts    # Pure: countdown checklist + urgent-mode compression
 │   ├── vendor-checklist.ts   # Pure: vendor list + book-immediately logic
 │   ├── idea-engine.ts        # Pure: deterministic palette/theme/activity ideas
 │   ├── plan-engine.ts        # Orchestrates the above into one PlanResult
 │   ├── deepseek.ts           # server-only — AI narrative, key never reaches the browser
-│   └── ratelimit.ts          # In-memory sliding-window limiter for the API route
-├── components/
-│   ├── wizard/                # Multi-step form
-│   ├── dashboard/              # Budget/timeline/vendor/idea views
-│   └── ui/                    # Shared Button, Card, Badge
+│   ├── ratelimit.ts          # In-memory sliding-window limiter for the API route
+│   └── pdf/PlanDocument.tsx  # @react-pdf/renderer document definition for the PDF export
 └── __tests__/                 # Vitest unit tests for every lib/ module
 ```
 
@@ -144,16 +158,18 @@ eventgenie/
 
 ## Testing
 
-27 unit tests (Vitest) cover every pure module in `lib/`:
+48 unit tests (Vitest) cover every pure module in `lib/`, including a parametrized pass over all
+7 event types for the budget and vendor engines:
 
-- `budget-engine`: allocation sums to the full budget, per-guest math, tight-budget warning
-  threshold, distinct rules per event type, zero-guest guard.
+- `budget-engine`: allocation sums to exactly 100% of the budget for every event type, per-guest
+  math, tight-budget warning threshold, distinct rules per event type, zero-guest guard.
 - `timeline-engine`: non-urgent vs. urgent-mode compression, overdue flagging, stable task
   ordering after compression.
-- `vendor-checklist`: book-immediately flag vs. remaining lead time, per-event-type checklists.
+- `vendor-checklist`: book-immediately flag vs. remaining lead time, non-empty checklist for every
+  event type.
 - `idea-engine`: palette keyword matching and fallback, event-type-specific ideas.
-- `schema`: accepts valid input, rejects bad enum/date/numbers, coerces form strings, applies
-  defaults.
+- `schema`: accepts all 7 event types, rejects bad enum/date/numbers, coerces form strings,
+  applies defaults.
 - `ratelimit`: allows under the cap, blocks over it, resets after the window, isolates clients.
 
 ```bash

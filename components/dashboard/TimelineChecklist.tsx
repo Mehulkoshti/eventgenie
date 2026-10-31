@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { CalendarClock } from "lucide-react";
 import type { TimelinePlan } from "@/lib/types";
 import { Card } from "@/components/ui/Card";
 import { PriorityBadge } from "@/components/ui/Badge";
+import { Alert } from "@/components/ui/Alert";
 
 const STORAGE_KEY = "eventgenie-checklist-progress";
 
@@ -43,18 +45,30 @@ export function TimelineChecklist({ timeline }: { timeline: TimelinePlan }) {
   };
 
   const sorted = [...timeline.tasks].sort((a, b) => b.daysBeforeEvent - a.daysBeforeEvent);
+  const doneCount = sorted.filter((t) => checked[t.id]).length;
 
   return (
     <Card>
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">Countdown checklist</h3>
-        <span className="text-sm text-slate-500">{timeline.daysUntilEvent} days to go</span>
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-400">
+            <CalendarClock className="h-5 w-5" aria-hidden="true" />
+          </span>
+          <div>
+            <h3 className="text-lg font-semibold">Countdown checklist</h3>
+            <p className="text-sm text-slate-500">
+              {doneCount}/{sorted.length} done · {timeline.daysUntilEvent} days to go
+            </p>
+          </div>
+        </div>
       </div>
 
       {timeline.urgentMode && (
-        <p role="alert" className="mt-2 rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:bg-rose-900/30 dark:text-rose-300">
-          ⏱️ Tight timeline — tasks below have been compressed to fit your remaining days. Prioritize critical items first.
-        </p>
+        <div className="mt-4">
+          <Alert variant="danger" title="Tight timeline" role="alert">
+            Tasks below have been compressed to fit your remaining days. Prioritize critical items first.
+          </Alert>
+        </div>
       )}
 
       <ul className="mt-4 space-y-2">

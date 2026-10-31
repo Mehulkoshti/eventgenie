@@ -1,6 +1,16 @@
 import { describe, expect, it } from "vitest";
 import { allocateBudget } from "@/lib/budget-engine";
-import type { EventInput } from "@/lib/types";
+import type { EventInput, EventType } from "@/lib/types";
+
+const ALL_EVENT_TYPES: EventType[] = [
+  "wedding",
+  "birthday",
+  "anniversary",
+  "babyShower",
+  "graduation",
+  "corporate",
+  "community",
+];
 
 const baseInput: EventInput = {
   eventType: "wedding",
@@ -47,5 +57,12 @@ describe("allocateBudget", () => {
   it("guards against zero guest count", () => {
     const plan = allocateBudget({ ...baseInput, guestCount: 0 });
     expect(Number.isFinite(plan.perGuest)).toBe(true);
+  });
+
+  it.each(ALL_EVENT_TYPES)("produces a valid, fully-allocated plan for %s", (eventType) => {
+    const plan = allocateBudget({ ...baseInput, eventType });
+    expect(plan.lines.length).toBeGreaterThan(0);
+    const totalPercent = plan.lines.reduce((sum, l) => sum + l.percent, 0);
+    expect(totalPercent).toBe(100);
   });
 });

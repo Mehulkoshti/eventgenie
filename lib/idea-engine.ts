@@ -22,6 +22,26 @@ const THEME_IDEAS: Record<EventType, string[]> = {
     "Themed cake-cutting playlist moment",
     "DIY craft/activity corner for younger guests",
   ],
+  anniversary: [
+    "A timeline wall of photos through the years",
+    "A short speech/toast segment from close family",
+    "Signature drink named after a shared memory",
+  ],
+  babyShower: [
+    "A 'guess the due date' board at the entrance",
+    "A wishes-for-baby card station",
+    "Soft pastel balloon arch as the photo backdrop",
+  ],
+  graduation: [
+    "A memory wall with throwback school/college photos",
+    "A 'what's next' guestbook with well-wishes",
+    "Cap-and-gown themed photo corner",
+  ],
+  corporate: [
+    "A branded welcome backdrop for photo moments",
+    "A short highlights/milestones recap segment",
+    "QR-code feedback wall for attendee suggestions",
+  ],
   community: [
     "Local volunteer recognition segment",
     "QR-code feedback wall for attendee suggestions",
@@ -32,6 +52,10 @@ const THEME_IDEAS: Record<EventType, string[]> = {
 const ACTIVITY_IDEAS: Record<EventType, string[]> = {
   wedding: ["Live music during cocktail hour", "Guest book or video message station", "Sparkler or confetti send-off"],
   birthday: ["Theme-based games with small prizes", "Surprise video montage", "Photo booth with instant prints"],
+  anniversary: ["Live music or a curated playlist", "A slideshow of memories", "A toast and speech segment"],
+  babyShower: ["Baby-themed games with small prizes", "A diaper-decorating station", "Advice cards for the parents-to-be"],
+  graduation: ["Group photo sessions by friend circles", "A playlist request board", "A short video montage of memories"],
+  corporate: ["Panel discussion or Q&A segment", "Networking icebreaker activity", "Recognition/awards segment"],
   community: ["Panel discussion or open mic segment", "Interactive booths/stalls", "Raffle or giveaway for participation"],
 };
 

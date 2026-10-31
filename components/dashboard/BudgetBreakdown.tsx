@@ -1,5 +1,7 @@
+import { Wallet } from "lucide-react";
 import type { BudgetPlan } from "@/lib/types";
 import { Card } from "@/components/ui/Card";
+import { Alert } from "@/components/ui/Alert";
 
 const formatInr = (n: number) =>
   new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(n);
@@ -7,15 +9,24 @@ const formatInr = (n: number) =>
 export function BudgetBreakdown({ budget }: { budget: BudgetPlan }) {
   return (
     <Card>
-      <h3 className="text-lg font-semibold">Budget breakdown</h3>
-      <p className="mt-1 text-sm text-slate-500">
-        Total {formatInr(budget.total)} · ~{formatInr(budget.perGuest)} per guest
-      </p>
+      <div className="flex items-center gap-2">
+        <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-400">
+          <Wallet className="h-5 w-5" aria-hidden="true" />
+        </span>
+        <div>
+          <h3 className="text-lg font-semibold">Budget breakdown</h3>
+          <p className="text-sm text-slate-500">
+            Total {formatInr(budget.total)} · ~{formatInr(budget.perGuest)} per guest
+          </p>
+        </div>
+      </div>
 
       {budget.warning && (
-        <p role="alert" className="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
-          ⚠️ {budget.warning}
-        </p>
+        <div className="mt-4">
+          <Alert variant="warning" title="Tight budget" role="alert">
+            {budget.warning}
+          </Alert>
+        </div>
       )}
 
       <table className="mt-4 w-full text-sm">
@@ -36,7 +47,10 @@ export function BudgetBreakdown({ budget }: { budget: BudgetPlan }) {
               </td>
               <td className="py-2 align-top">
                 <div className="h-2 w-28 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800" aria-hidden="true">
-                  <div className="h-full rounded-full bg-indigo-500" style={{ width: `${line.percent}%` }} />
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-violet-500"
+                    style={{ width: `${line.percent}%` }}
+                  />
                 </div>
                 <span className="text-xs text-slate-500">{line.percent}%</span>
               </td>

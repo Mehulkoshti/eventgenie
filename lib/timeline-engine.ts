@@ -38,6 +38,42 @@ const TIMELINE_TEMPLATES: Record<EventType, TaskTemplate[]> = {
     { task: "Arrange seating, signage & first-aid", category: "Logistics", weeksBefore: 2, priority: "critical" },
     { task: "Final volunteer & safety briefing", category: "Logistics", weeksBefore: 1, priority: "critical" },
   ],
+  anniversary: [
+    { task: "Decide theme, guest list and budget", category: "Planning", weeksBefore: 8, priority: "critical" },
+    { task: "Book venue", category: "Venue", weeksBefore: 7, priority: "critical" },
+    { task: "Book caterer and order cake", category: "Catering", weeksBefore: 4, priority: "critical" },
+    { task: "Book photographer", category: "Photography", weeksBefore: 4, priority: "important" },
+    { task: "Send invitations", category: "Stationery", weeksBefore: 3, priority: "important" },
+    { task: "Confirm decor and entertainment", category: "Decor", weeksBefore: 2, priority: "important" },
+    { task: "Confirm final headcount with vendors", category: "Catering", weeksBefore: 1, priority: "critical" },
+  ],
+  babyShower: [
+    { task: "Decide theme and guest list", category: "Planning", weeksBefore: 6, priority: "critical" },
+    { task: "Book venue or confirm home setup", category: "Venue", weeksBefore: 5, priority: "critical" },
+    { task: "Order cake and finalize menu", category: "Catering", weeksBefore: 3, priority: "critical" },
+    { task: "Send invitations", category: "Stationery", weeksBefore: 3, priority: "important" },
+    { task: "Plan games and order favors", category: "Games & favors", weeksBefore: 2, priority: "important" },
+    { task: "Order decor and backdrop", category: "Decor", weeksBefore: 2, priority: "important" },
+    { task: "Confirm final headcount with vendors", category: "Catering", weeksBefore: 1, priority: "critical" },
+  ],
+  graduation: [
+    { task: "Decide theme and guest list", category: "Planning", weeksBefore: 6, priority: "critical" },
+    { task: "Book venue", category: "Venue", weeksBefore: 5, priority: "critical" },
+    { task: "Order cake and finalize menu", category: "Catering", weeksBefore: 3, priority: "critical" },
+    { task: "Book photographer/DJ", category: "Entertainment", weeksBefore: 3, priority: "important" },
+    { task: "Send invitations", category: "Stationery", weeksBefore: 3, priority: "important" },
+    { task: "Order decor and memory wall props", category: "Decor", weeksBefore: 2, priority: "important" },
+    { task: "Confirm final headcount with vendors", category: "Catering", weeksBefore: 1, priority: "critical" },
+  ],
+  corporate: [
+    { task: "Define objective, budget and guest list", category: "Planning", weeksBefore: 12, priority: "critical" },
+    { task: "Book venue and confirm AV setup", category: "Venue", weeksBefore: 10, priority: "critical" },
+    { task: "Confirm speakers/performers", category: "Program", weeksBefore: 8, priority: "important" },
+    { task: "Book caterer", category: "Catering", weeksBefore: 6, priority: "critical" },
+    { task: "Send invitations and open registration", category: "Stationery", weeksBefore: 4, priority: "important" },
+    { task: "Confirm decor, branding and signage", category: "Decor", weeksBefore: 2, priority: "important" },
+    { task: "Confirm final headcount with vendors", category: "Catering", weeksBefore: 1, priority: "critical" },
+  ],
 };
 
 const DAY_MS = 24 * 60 * 60 * 1000;

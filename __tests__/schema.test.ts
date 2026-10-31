@@ -23,6 +23,14 @@ describe("eventInputSchema", () => {
     expect(result.success).toBe(false);
   });
 
+  it.each(["wedding", "birthday", "anniversary", "babyShower", "graduation", "corporate", "community"])(
+    "accepts the %s event type",
+    (eventType) => {
+      const result = eventInputSchema.safeParse({ ...validInput, eventType });
+      expect(result.success).toBe(true);
+    },
+  );
+
   it("rejects a non-date eventDate", () => {
     const result = eventInputSchema.safeParse({ ...validInput, eventDate: "not-a-date" });
     expect(result.success).toBe(false);
