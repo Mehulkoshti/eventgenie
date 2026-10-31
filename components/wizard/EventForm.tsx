@@ -1,66 +1,20 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import {
-  ArrowLeft,
-  ArrowRight,
-  Sparkles,
-  Tag,
-  CalendarDays,
-  Users,
-  Wallet,
-  MapPin,
-  Palette,
-  MapPinned,
-  UtensilsCrossed,
-  Camera,
-  Music,
-  Mail,
-  Shirt,
-} from "lucide-react";
+import { ArrowLeft, ArrowRight, Sparkles } from "lucide-react";
 import { eventInputSchema } from "@/lib/schema";
-import type { EventInput, EventType } from "@/lib/types";
+import type { EventInput } from "@/lib/types";
 import { Button } from "@/components/ui/Button";
 import { Alert } from "@/components/ui/Alert";
-import { InputField } from "@/components/ui/InputField";
 import { ProgressSteps } from "./ProgressSteps";
+import { StepEventBasics } from "./steps/StepEventBasics";
+import { StepScaleBudget } from "./steps/StepScaleBudget";
+import { StepVibeFocus } from "./steps/StepVibeFocus";
+import { todayPlus } from "./constants";
+import type { FormState } from "./types";
 
-export const EVENT_TYPES: { value: EventType; label: string; emoji: string }[] = [
-  { value: "wedding", label: "Wedding", emoji: "💍" },
-  { value: "birthday", label: "Birthday", emoji: "🎂" },
-  { value: "anniversary", label: "Anniversary", emoji: "💞" },
-  { value: "babyShower", label: "Baby shower", emoji: "👶" },
-  { value: "graduation", label: "Graduation", emoji: "🎓" },
-  { value: "corporate", label: "Corporate event", emoji: "🏢" },
-  { value: "community", label: "Community event", emoji: "🎪" },
-];
-
-const FOCUS_AREAS = [
-  { label: "Venue", Icon: MapPinned },
-  { label: "Catering", Icon: UtensilsCrossed },
-  { label: "Decor", Icon: Palette },
-  { label: "Photography", Icon: Camera },
-  { label: "Entertainment", Icon: Music },
-  { label: "Invitations", Icon: Mail },
-  { label: "Attire", Icon: Shirt },
-];
-
-const todayPlus = (days: number) => {
-  const d = new Date();
-  d.setDate(d.getDate() + days);
-  return d.toISOString().slice(0, 10);
-};
-
-export interface FormState {
-  eventType: EventType;
-  eventName: string;
-  eventDate: string;
-  guestCount: string;
-  budget: string;
-  location: string;
-  vibe: string;
-  focusAreas: string[];
-}
+export { EVENT_TYPES } from "./constants";
+export type { FormState } from "./types";
 
 const INITIAL_STATE: FormState = {
   eventType: "wedding",
@@ -72,6 +26,21 @@ const INITIAL_STATE: FormState = {
   vibe: "",
   focusAreas: [],
 };
+
+/** Validates only the fields collected on the given step; step 3 has no required fields. */
+function validateStep(step: number, form: FormState): string | null {
+  if (step === 1) {
+    if (!form.eventName.trim()) return "Please name your event.";
+    if (!form.eventDate) return "Please choose an event date.";
+  }
+  if (step === 2) {
+    if (!form.location.trim()) return "Please tell us the city/location.";
+    if (Number(form.guestCount) < 1 || Number(form.budget) < 1000) {
+      return "Guest count and budget must be realistic positive numbers.";
+    }
+  }
+  return null;
+}
 
 export function EventForm({
   onSubmit,
@@ -95,61 +64,26 @@ export function EventForm({
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
-  const toggleFocusArea = (area: string) => {
-    setForm((prev) => ({
-      ...prev,
-      focusAreas: prev.focusAreas.includes(area)
-        ? prev.focusAreas.filter((a) => a !== area)
-        : [...prev.focusAreas, area],
-    }));
-  };
-
-  const validateStep = (): boolean => {
-    if (step === 1) {
-      if (!form.eventName.trim()) {
-        setError("Please name your event.");
-        return false;
-      }
-      if (!form.eventDate) {
-        setError("Please choose an event date.");
-        return false;
-      }
-    }
-    if (step === 2) {
-      if (!form.location.trim()) {
-        setError("Please tell us the city/location.");
-        return false;
-      }
-      if (Number(form.guestCount) < 1 || Number(form.budget) < 1000) {
-        setError("Guest count and budget must be realistic positive numbers.");
-        return false;
-      }
+  const goNext = () => {
+    const message = validateStep(step, form);
+    if (message) {
+      setError(message);
+      return;
     }
     setError(null);
-    return true;
-  };
-
-  const goNext = () => {
-    if (validateStep()) setStep((s) => Math.min(3, s + 1));
+    setStep((s) => Math.min(3, s + 1));
   };
   const goBack = () => setStep((s) => Math.max(1, s - 1));
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
-    if (!validateStep()) return;
+    const message = validateStep(step, form);
+    if (message) {
+      setError(message);
+      return;
+    }
 
-    const candidate = {
-      eventType: form.eventType,
-      eventName: form.eventName,
-      eventDate: form.eventDate,
-      guestCount: form.guestCount,
-      budget: form.budget,
-      location: form.location,
-      vibe: form.vibe,
-      focusAreas: form.focusAreas,
-    };
-
-    const parsed = eventInputSchema.safeParse(candidate);
+    const parsed = eventInputSchema.safeParse(form);
     if (!parsed.success) {
       setError(parsed.error.issues[0]?.message ?? "Please check your inputs.");
       return;
@@ -171,144 +105,9 @@ export function EventForm({
         </div>
       )}
 
-      {step === 1 && (
-        <fieldset key="step-1" className="animate-step-in space-y-5">
-          <legend className="mb-3 flex items-center gap-1.5 text-base font-semibold">
-            <Sparkles className="h-4 w-4 text-indigo-500" aria-hidden="true" />
-            What are we celebrating?
-          </legend>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3" role="radiogroup" aria-label="Event type">
-            {EVENT_TYPES.map((type) => (
-              <button
-                key={type.value}
-                type="button"
-                role="radio"
-                aria-checked={form.eventType === type.value}
-                onClick={() => update("eventType", type.value)}
-                className={`group relative overflow-hidden rounded-xl border p-4 text-left transition-all duration-150 hover:-translate-y-0.5 hover:shadow-md ${
-                  form.eventType === type.value
-                    ? "border-transparent bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-lg shadow-indigo-500/25"
-                    : "border-slate-200 bg-white hover:border-indigo-300 dark:border-slate-700 dark:bg-slate-900"
-                }`}
-              >
-                <span
-                  className="block text-2xl transition-transform group-hover:scale-110"
-                  aria-hidden="true"
-                >
-                  {type.emoji}
-                </span>
-                <p className={`mt-1.5 text-sm font-semibold ${form.eventType === type.value ? "text-white" : ""}`}>
-                  {type.label}
-                </p>
-              </button>
-            ))}
-          </div>
-
-          <InputField
-            label="Event name"
-            icon={<Tag className="h-4 w-4" aria-hidden="true" />}
-            type="text"
-            value={form.eventName}
-            onChange={(e) => update("eventName", e.target.value)}
-            placeholder="e.g. Rhea & Dev's Wedding"
-            required
-          />
-
-          <InputField
-            label="Event date"
-            icon={<CalendarDays className="h-4 w-4" aria-hidden="true" />}
-            type="date"
-            value={form.eventDate}
-            onChange={(e) => update("eventDate", e.target.value)}
-            required
-          />
-        </fieldset>
-      )}
-
-      {step === 2 && (
-        <fieldset key="step-2" className="animate-step-in space-y-5">
-          <legend className="mb-3 flex items-center gap-1.5 text-base font-semibold">
-            <Wallet className="h-4 w-4 text-indigo-500" aria-hidden="true" />
-            Scale & budget
-          </legend>
-
-          <InputField
-            label="Expected guest count"
-            icon={<Users className="h-4 w-4" aria-hidden="true" />}
-            type="number"
-            min={1}
-            value={form.guestCount}
-            onChange={(e) => update("guestCount", e.target.value)}
-            required
-          />
-
-          <InputField
-            label="Total budget (₹)"
-            icon={<Wallet className="h-4 w-4" aria-hidden="true" />}
-            type="number"
-            min={1000}
-            step={1000}
-            value={form.budget}
-            onChange={(e) => update("budget", e.target.value)}
-            required
-          />
-
-          <InputField
-            label="City/location"
-            icon={<MapPin className="h-4 w-4" aria-hidden="true" />}
-            type="text"
-            value={form.location}
-            onChange={(e) => update("location", e.target.value)}
-            placeholder="e.g. Jaipur"
-            required
-          />
-        </fieldset>
-      )}
-
-      {step === 3 && (
-        <fieldset key="step-3" className="animate-step-in space-y-5">
-          <legend className="mb-3 flex items-center gap-1.5 text-base font-semibold">
-            <Palette className="h-4 w-4 text-indigo-500" aria-hidden="true" />
-            Vibe & focus areas
-          </legend>
-
-          <InputField
-            label="Describe the vibe/theme"
-            icon={<Palette className="h-4 w-4" aria-hidden="true" />}
-            type="text"
-            value={form.vibe}
-            onChange={(e) => update("vibe", e.target.value)}
-            placeholder="e.g. pastel garden, boho, royal, minimal"
-          />
-
-          <div>
-            <span className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
-              What matters most to you? (optional)
-            </span>
-            <div className="flex flex-wrap gap-2" role="group" aria-label="Focus areas">
-              {FOCUS_AREAS.map(({ label: area, Icon }) => {
-                const selected = form.focusAreas.includes(area);
-                return (
-                  <button
-                    type="button"
-                    key={area}
-                    aria-pressed={selected}
-                    onClick={() => toggleFocusArea(area)}
-                    className={`flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm transition-all ${
-                      selected
-                        ? "border-transparent bg-gradient-to-r from-indigo-500 to-violet-600 text-white shadow-sm"
-                        : "border-slate-300 text-slate-700 hover:border-indigo-300 dark:border-slate-700 dark:text-slate-300"
-                    }`}
-                  >
-                    <Icon className="h-3.5 w-3.5" aria-hidden="true" />
-                    {area}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </fieldset>
-      )}
+      {step === 1 && <StepEventBasics form={form} update={update} />}
+      {step === 2 && <StepScaleBudget form={form} update={update} />}
+      {step === 3 && <StepVibeFocus form={form} update={update} />}
 
       <div className="flex items-center justify-between border-t border-slate-100 pt-5 dark:border-slate-800">
         <Button type="button" variant="ghost" onClick={goBack} disabled={step === 1}>

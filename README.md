@@ -2,7 +2,7 @@
 
 ![Next.js](https://img.shields.io/badge/Next.js-16-black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue)
-![Tests](https://img.shields.io/badge/tests-64%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-76%20passing-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
 A GenAI-powered planning assistant that turns a few basic facts about a celebration into a
@@ -85,7 +85,7 @@ server-side only.
 | Smart, dynamic assistant | Form → deterministic engine → AI narrative pipeline, fully dynamic per event type |
 | Logical decision making based on user context | Budget % varies by event type; tight-budget warning from per-guest spend; urgent-mode timeline compression from days-until-event; book-immediately flags from vendor lead time vs. remaining time |
 | Practical, real-world usability | Real INR budgeting, realistic vendor lead times, a real downloadable PDF, persisted checklist progress, 7 event types |
-| Clean, maintainable code | Pure functions in `lib/`, typed end-to-end, Zod-validated API boundary, 64 unit tests |
+| Clean, maintainable code | Pure functions in `lib/`, typed end-to-end, Zod-validated API boundary, 76 tests |
 
 ## Assumptions
 
@@ -110,7 +110,10 @@ eventgenie/
 │   └── api/plan/route.ts     # POST /api/plan — validates input, builds plan, calls AI
 ├── components/
 │   ├── HomeExperience.tsx     # Marketing landing: hero → features → how-it-works → CTA
-│   ├── wizard/                 # Multi-step form
+│   ├── wizard/
+│   │   ├── EventForm.tsx       # Orchestrator: step state, validation, submit
+│   │   ├── steps/               # One component per step (basics/budget/vibe)
+│   │   └── constants.ts, types.ts
 │   ├── dashboard/               # Budget/timeline/vendor/idea views + PDF download
 │   └── ui/                     # Shared Button, Card, Badge, Alert
 ├── lib/
@@ -124,7 +127,7 @@ eventgenie/
 │   ├── deepseek.ts           # server-only — AI narrative, key never reaches the browser
 │   ├── ratelimit.ts          # In-memory sliding-window limiter for the API route
 │   └── pdf/PlanDocument.tsx  # @react-pdf/renderer document definition for the PDF export
-└── __tests__/                 # Vitest unit tests for every lib/ module
+└── __tests__/                 # Vitest tests for every lib/ module, the API route, and key components
 ```
 
 ## Security
@@ -174,7 +177,8 @@ eventgenie/
 
 ## Testing
 
-64 tests (Vitest + Testing Library) cover every pure module in `lib/` plus key component behavior:
+76 tests (Vitest + Testing Library) cover every pure module in `lib/`, the API route itself, and
+key component behavior:
 
 - `budget-engine`: allocation sums to exactly 100% of the budget for every event type, per-guest
   math, tight-budget warning threshold, distinct rules per event type, zero-guest guard.
@@ -187,6 +191,15 @@ eventgenie/
 - `schema`: accepts all 7 event types, rejects bad enum/date/numbers, coerces form strings,
   applies defaults.
 - `ratelimit`: allows under the cap, blocks over it, resets after the window, isolates clients.
+- `plan-engine`: assembles budget/timeline/vendor/idea output from one input, starts
+  un-enhanced until the route adds a narrative, feeds the timeline's real days-until-event into
+  the vendor checklist (not a hardcoded value).
+- `deepseek`: skips the network entirely (no `fetch` call) when no API key is set, and returns
+  `null` — never throws — on a non-OK response or a network error, so the route's deterministic
+  fallback always has a clean signal to act on.
+- **`POST /api/plan` (the actual route handler, not just the engines it calls)**: returns a full
+  plan for valid input, 400s on invalid input or malformed JSON without crashing, and 429s after
+  repeated requests from the same client.
 - `Alert`: renders title/children, defaults to a non-interrupting `status` role, switches to
   `alert` when passed explicitly.
 - `EventForm`: renders all 7 event types with the right default selection, blocks advancing past
